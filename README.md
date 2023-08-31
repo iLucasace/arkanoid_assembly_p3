@@ -22,7 +22,7 @@ $ ./p3as-linux arkanoid.as
 
 ### Run the emulator:
 ```
-$ ava -jar p3sim.jar arkanoid.exe
+$ java -jar p3sim.jar arkanoid.exe
 ```
 
 ## Game Commands
