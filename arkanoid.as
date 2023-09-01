@@ -8,12 +8,12 @@ IO_READ         EQU     FFFFh
 IO_WRITE        EQU     FFFEh
 IO_STATUS       EQU     FFFDh
 INITIAL_SP      EQU     FDFFh
-CURSOR		    EQU     FFFCh
-CURSOR_INIT		EQU		FFFFh
-ROW_POSITION	EQU		0d
-COL_POSITION	EQU		0d
-ROW_SHIFT		EQU		8d
-COLUMN_SHIFT	EQU		8d
+CURSOR		EQU     FFFCh
+CURSOR_INIT	EQU     FFFFh
+ROW_POSITION	EQU	0d
+COL_POSITION	EQU	0d
+ROW_SHIFT	EQU	8d
+COLUMN_SHIFT	EQU	8d
 
 ;------------------------------------------------------------------------------
 ; ZONA II: definicao de variaveis
@@ -24,7 +24,7 @@ COLUMN_SHIFT	EQU		8d
 
         	ORIG    8000h
 Line0Map	STR '   Score: 00 | Lifes: S2 S2 S2                                        Arkanoid  '
-Line1Map	STR '|------------------------------------------------------------------------------|'
+Line1Map	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|'
 Line2Map	STR '|                                                                              |'
 Line3Map	STR '|                                                                              |'
 Line4Map	STR '|                                                                              |'
@@ -46,10 +46,10 @@ Line19Map  	STR '|                                                              
 Line20Map  	STR '|                                                                              |'
 Line21Map  	STR '|                                                                              |'
 Line22Map  	STR '|                                                                              |'
-Line23Map  	STR '|------------------------------------------------------------------------------|', FIM_TEXTO
+Line23Map  	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|', FIM_TEXTO
 
-StringToPrint	WORD 0d  ; endereco da string que será impressa
-LineNumberToPrint	WORD 0d  ; número da linha que será impressa
+StringToPrint WORD 0d  ; endereco da string que será impressa
+LineNumberToPrint WORD 0d  ; número da linha que será impressa
 
 ;------------------------------------------------------------------------------
 ; ZONA II: definicao de tabela de interrupções
@@ -68,55 +68,55 @@ LineNumberToPrint	WORD 0d  ; número da linha que será impressa
 ; Funções
 ;------------------------------------------------------------------------------
 PrintLines:	PUSH R1
-			MOV R4, M[StringToPrint]
+		MOV R4, M[StringToPrint]
 
-			while_Columns:	MOV R2, 0d
+		while_Columns:	MOV R2, 0d
 
-			while_Lines: 	MOV R1, M[LineNumberToPrint]
-							MOV R3, M[R4]
+		while_Lines: 	MOV R1, M[LineNumberToPrint]
+				MOV R3, M[R4]
 
-							SHL R1, 8d
-							OR R1, R2
-							MOV M[CURSOR], R1
-							MOV M[IO_WRITE ], R3
+				SHL R1, 8d
+				OR R1, R2
+				MOV M[CURSOR], R1
+				MOV M[IO_WRITE ], R3
 
-							INC R2
-							INC R4
+				INC R2
+				INC R4
 
-							CMP R2, 80d
-							JMP.NZ while_Lines
+				CMP R2, 80d
+				JMP.NZ while_Lines
 
-							MOV R1, M[LineNumberToPrint]
-							INC R1
-							MOV M[ LineNumberToPrint], R1
+				MOV R1, M[LineNumberToPrint]
+				INC R1
+				MOV M[ LineNumberToPrint], R1
 
-							CMP R1, 24d
-							JMP.NZ while_Columns
+				CMP R1, 24d
+				JMP.NZ while_Columns
 
 			POP R1
 			RET
 
 PrintMap:	PUSH R1
-			MOV  R1, Line0Map
-		  	MOV  M[ StringToPrint ], R1
-		  	MOV  R1, 0d
-   		  	MOV  M[ LineNumberToPrint ], R1
+		MOV  R1, Line0Map
+		MOV  M[ StringToPrint ], R1
+		MOV  R1, 0d
+   		MOV  M[ LineNumberToPrint ], R1
 
-		  	CALL PrintLines
+		CALL PrintLines
 
-			POP R1
-			RET
+	        POP R1
+		RET
 ;------------------------------------------------------------------------------
 ; Função Main
 ;------------------------------------------------------------------------------
 Main:	ENI
 
-		MOV		R1, INITIAL_SP
-		MOV		SP, R1		 		; We need to initialize the stack
-		MOV		R1, CURSOR_INIT		; We need to initialize the cursor 
-		MOV		M[ CURSOR ], R1		; with value CURSOR_INIT
+	MOV		R1, INITIAL_SP
+	MOV		SP, R1		 		; We need to initialize the stack
+	MOV		R1, CURSOR_INIT		; We need to initialize the cursor 
+	MOV		M[ CURSOR ], R1		; with value CURSOR_INIT
 
-		CALL PrintMap
+	CALL PrintMap
 
-Cycle: 			BR		Cycle	
+Cycle: 		BR		Cycle	
 Halt:           BR		Halt
