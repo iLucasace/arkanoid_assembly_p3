@@ -26,12 +26,12 @@ COLUMN_SHIFT	EQU	8d
 Line0Map	STR '   Score: 00 | Lifes: S2 S2 S2                                        Arkanoid  '
 Line1Map	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|'
 Line2Map	STR '|                                                                              |'
-Line3Map	STR '|                                                                              |'
-Line4Map	STR '|                                                                              |'
-Line5Map   	STR '|                                                                              |'
-Line6Map   	STR '|                                                                              |'
-Line7Map   	STR '|                                                                              |'
-Line8Map   	STR '|                                                                              |'
+Line3Map	STR '|         ============================================================         |'
+Line4Map	STR '|         ============================================================	    |'
+Line5Map   	STR '|         ============================================================         |'
+Line6Map   	STR '|         ============================================================         |'
+Line7Map   	STR '|         ============================================================         |'
+Line8Map   	STR '|         ============================================================         |'
 Line9Map   	STR '|                                                                              |'
 Line10Map  	STR '|                                                                              |'
 Line11Map  	STR '|                                                                              |'
@@ -39,17 +39,17 @@ Line12Map  	STR '|                                                              
 Line13Map  	STR '|                                                                              |'
 Line14Map  	STR '|                                                                              |'
 Line15Map  	STR '|                                                                              |'
-Line16Map  	STR '|                                                                              |'
+Line16Map  	STR '|                                      o                                       |'
 Line17Map  	STR '|                                                                              |'
 Line18Map  	STR '|                                                                              |'
 Line19Map  	STR '|                                                                              |'
-Line20Map  	STR '|                                                                              |'
+Line20Map  	STR '|                        ------------------------------                        |'
 Line21Map  	STR '|                                                                              |'
 Line22Map  	STR '|                                                                              |'
 Line23Map  	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|', FIM_TEXTO
 
-StringToPrint WORD 0d  ; endereco da string que será impressa
-LineNumberToPrint WORD 0d  ; número da linha que será impressa
+StringToPrint WORD 0d  ; Endereco da string que será impressa
+LineNumberToPrint WORD 0d  ; Número da linha que será impressa
 
 ;------------------------------------------------------------------------------
 ; ZONA II: definicao de tabela de interrupções
@@ -97,10 +97,10 @@ PrintLines:	PUSH R1
 			RET
 
 PrintMap:	PUSH R1
-		MOV  R1, Line0Map
-		MOV  M[ StringToPrint ], R1
-		MOV  R1, 0d
-   		MOV  M[ LineNumberToPrint ], R1
+		MOV R1, Line0Map
+		MOV M[ StringToPrint ], R1
+		MOV R1, 0d
+   		MOV M[ LineNumberToPrint ], R1
 
 		CALL PrintLines
 
@@ -111,12 +111,12 @@ PrintMap:	PUSH R1
 ;------------------------------------------------------------------------------
 Main:	ENI
 
-	MOV		R1, INITIAL_SP
-	MOV		SP, R1		 		; We need to initialize the stack
-	MOV		R1, CURSOR_INIT		; We need to initialize the cursor 
-	MOV		M[ CURSOR ], R1		; with value CURSOR_INIT
+	MOV R1, INITIAL_SP
+	MOV SP, R1		 	; We need to initialize the stack
+	MOV R1, CURSOR_INIT		; We need to initialize the cursor 
+	MOV M[ CURSOR ], R1		; with value CURSOR_INIT
 
 	CALL PrintMap
 
-Cycle: 		BR		Cycle	
-Halt:           BR		Halt
+Cycle: 	BR	Cycle	
+Halt:   BR	Halt
