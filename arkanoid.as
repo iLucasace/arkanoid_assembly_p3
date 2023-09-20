@@ -29,6 +29,8 @@ LEFT_DOWN       EQU     4d
 FALSE			EQU		0d
 TRUE			EQU		1d
 
+MAP_LINE_SIZE	EQU		80d
+
 ;-----------------------------------------------------------------------------
 ; ZONA II: definicao de variaveis
 ;          Pseudo-instrucoes : WORD - palavra (16 bits)
@@ -98,16 +100,16 @@ Line6Loose  STR '             | | | |__| | |__| |  | |___| |__| | |__| |____) | 
 Line7Loose  STR '             |_|  \____/ \____/   |______\____/ \____/|_____/|______(_)         '
 Line8Loose  STR '                                                                                '
 Line9Loose  STR '                                                                                '
-Line10Loose STR '                                       :)                                       '
+Line10Loose STR '                                       :(                                       '
 Line11Loose STR '                                                                                '
 Line12Loose STR '                                                                                '
 Line13Loose STR '                                                                                '
 Line14Loose STR '                                                                                '
 Line15Loose STR '                                                                                '
-Line16Loose STR '                                                                                '
+Line16Loose STR '                                   Score: 300                                   '
 Line17Loose STR '                                                                                '
 Line18Loose STR '                                                                                '
-Line19Loose STR '                           -> PRESS P TO PLAY AGAIN <-                          '
+Line19Loose STR '                                                                                '
 Line20Loose STR '                                                                                '
 Line21Loose STR '                                                                                '
 Line22Loose STR '                                                                                '
@@ -166,57 +168,113 @@ Timer:		PUSH R1
 
 			RightUp:	MOV R1, M[yBall]
 						MOV R2, M[xBall]
+						MOV R3, MAP_LINE_SIZE
 
-						CMP R1, 2d
-						JMP.Z UpLine_RU
-						CMP R2, 1d
-						JMP.Z RightLine_RU
+						MUL R1, R3
+						ADD R3, R2	
+						MOV R2, Line0Map
+						ADD R3, R2
+						MOV R1, M[ R3 ]
+						MOV R2, '='
+						CMP R1, R2
+						JMP.Z BrickDetected_RU
+						JMP ContinueRightUp
 
-						MOV R1, M[yBall]
-						MOV R2, M[xBall]
+					BrickDetected_RU: 	MOV R2, ' '
+										MOV M[R3], R2
 
-						SHL R1, 8d
-						OR R1, R2
-						MOV M[CURSOR], R1
-						MOV R1, ' '
-						MOV M[IO_WRITE], R1
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
 
-						MOV R1, M[yBall]
-						MOV R2, M[xBall]
-						DEC R1
-						INC R2
+										SHL R1, 8d
+										OR R1, R2
+										MOV M[CURSOR], R1
+										MOV R1, ' '
+										MOV M[IO_WRITE], R1
 
-						MOV M[yBall], R1
-						MOV M[xBall], R2
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										INC R1
+										INC R2
+										MOV R3, MAP_LINE_SIZE
 
-						SHL R1, 8d
-						OR R1, R2
-						MOV M[CURSOR], R1
-						MOV R1, 'o'
-						MOV M[IO_WRITE], R1
-						JMP End
+										MUL R1, R3
+										ADD R3, R2
+										MOV R2, Line0Map
+										ADD R3, R2
+										MOV R1, M[R3]
+										MOV R2, ' '
+										CMP R1, R2
+										JMP.Z UpLine_RU
+
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										DEC R1
+										DEC R2
+										MOV R3, MAP_LINE_SIZE
+
+										MUL R1, R3
+										ADD R3, R2
+										MOV R2, Line0Map
+										ADD R3, R2
+										MOV R1, M[R3]
+										MOV R2, ' '
+										CMP R1, R2
+										JMP.Z RightLine_RU
+
+										MOV R1, LEFT_DOWN
+										MOV M[BallDirection], R1
+										JMP End
+
+					ContinueRightUp:	MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										
+										CMP R1, 2d
+										JMP.Z UpLine_RU
+										CMP R2, 78d
+										JMP.Z RightLine_RU
+
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+
+										SHL R1, 8d
+										OR R1, R2
+										MOV M[CURSOR], R1
+										MOV R1, ' '
+										MOV M[IO_WRITE], R1
+
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										DEC R1
+										INC R2
+
+										MOV M[yBall], R1
+										MOV M[xBall], R2
+
+										SHL R1, 8d
+										OR R1, R2
+										MOV M[CURSOR], R1
+										MOV R1, 'o'
+										MOV M[IO_WRITE], R1
+										JMP End
 
 			RightDown:	MOV R1, M[yBall]
 						MOV R2, M[xBall]
 
-						MOV R3, M[LeftColumnBar]
+						MOV R3, MAP_LINE_SIZE
 
-						CMP R1, 19d
-						JMP.NZ NoBarCollision_RD
-						CMP R2, R3
-						JMP.NP NoBarCollision_RD
+						MUL R1, R3
+						ADD R3, R2	
+						MOV R2, Line0Map
+						ADD R3, R2
+						MOV R1, M[ R3 ]
+						MOV R2, '='
+						CMP R1, R2
+						JMP.Z BrickDetected_RD
+						JMP ContinueRightDown
 
-						MOV R4, 29d
-						ADD R3, R4
-						CMP R3, R2
-						JMP.NP NoBarCollision_RD
-
-						JMP DownLine_RD
-
-						NoBarCollision_RD:	CMP R1, 22d
-											CALL.Z LoseLife
-											CMP R2, 78d
-											JMP.Z RightLine_RD
+						BrickDetected_RD:	MOV R2, ' '
+											MOV M[R3], R2
 
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
@@ -229,72 +287,100 @@ Timer:		PUSH R1
 
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
-											INC R1
+											DEC R1
 											INC R2
+											MOV R3, MAP_LINE_SIZE
 
-											MOV M[yBall], R1
-											MOV M[xBall], R2
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z DownLine_RD
 
-											SHL R1, 8d
-											OR R1, R2
-											MOV M[CURSOR], R1
-											MOV R1, 'o'
-											MOV M[IO_WRITE], R1
+											MOV R1, M[yBall]
+											MOV R2, M[xBall]
+											INC R1
+											DEC R2
+											MOV R3, MAP_LINE_SIZE
+
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z RightLine_RD
+
+											MOV R1, LEFT_UP
+											MOV M[BallDirection], R1
 											JMP End
+
+						ContinueRightDown: 	MOV R1, M[yBall]
+											MOV R2, M[xBall]
+
+											MOV R3, M[LeftColumnBar]
+
+											CMP R1, 19d
+											JMP.NZ NoBarCollision_RD
+											CMP R2, R3
+											JMP.NP NoBarCollision_RD
+
+											MOV R4, 29d
+											ADD R3, R4
+											CMP R3, R2
+											JMP.NP NoBarCollision_RD
+
+											JMP DownLine_RD
+
+											NoBarCollision_RD:	CMP R1, 22d
+																CALL.Z LoseLifes
+																CMP R2, 78d
+																JMP.Z RightLine_RD
+
+																MOV R1, M[yBall]
+																MOV R2, M[xBall]
+
+																SHL R1, 8d
+																OR R1, R2
+																MOV M[CURSOR], R1
+																MOV R1, ' '
+																MOV M[IO_WRITE], R1
+
+																MOV R1, M[yBall]
+																MOV R2, M[xBall]
+																INC R1
+																INC R2
+
+																MOV M[yBall], R1
+																MOV M[xBall], R2
+
+																SHL R1, 8d
+																OR R1, R2
+																MOV M[CURSOR], R1
+																MOV R1, 'o'
+																MOV M[IO_WRITE], R1
+																JMP End
 
 			LeftUp:		MOV R1, M[yBall]
 						MOV R2, M[xBall]
+						MOV R3, MAP_LINE_SIZE
 
-						CMP R1, 2d
-						JMP.Z UpLine_LU
-						CMP R2, 1d
-						JMP.Z LeftLine_LU
+						MUL R1, R3
+						ADD R3, R2	
+						MOV R2, Line0Map
+						ADD R3, R2
+						MOV R1, M[ R3 ]
+						MOV R2, '='
+						CMP R1, R2
+						JMP.Z BrickDetected_LU
+						JMP ContinueLeftUp
 
-						MOV R1, M[yBall]
-						MOV R2, M[xBall]
-
-						SHL R1, 8d
-						OR R1, R2
-						MOV M[CURSOR], R1
-						MOV R1, ' '
-						MOV M[IO_WRITE], R1
-
-						MOV R1, M[yBall]
-						MOV R2, M[xBall]
-						DEC R1
-						DEC R2
-
-						MOV M[yBall], R1
-						MOV M[xBall], R2
-
-						SHL R1, 8d
-						OR R1, R2
-						MOV M[CURSOR], R1
-						MOV R1, 'o'
-						MOV M[IO_WRITE], R1
-						JMP End
-			
-			LeftDown:	MOV R1, M[yBall]
-						MOV R2, M[xBall]
-
-						MOV R3, M[LeftColumnBar]
-
-						CMP R1, 19d
-						JMP.NZ NoBarCollision_LD
-						CMP R2, R3
-						JMP.NP NoBarCollision_LD
-
-						MOV R4, 29d
-						ADD R3, R4
-						CMP R3, R2
-						JMP.NP NoBarCollision_LD
-
-						JMP DownLine_LD
-
-						NoBarCollision_LD:	CMP R1, 22d
-											CALL.Z LoseLife
-											CMP R2, 1d
-											JMP.Z LeftLine_LD
+						BrickDetected_LU:	MOV R2, ' '
+											MOV M[R3], R2
 
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
@@ -309,16 +395,173 @@ Timer:		PUSH R1
 											MOV R2, M[xBall]
 											INC R1
 											DEC R2
+											MOV R3, MAP_LINE_SIZE
 
-											MOV M[yBall], R1
-											MOV M[xBall], R2
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z UpLine_LU
+
+											MOV R1, M[yBall]
+											MOV R2, M[xBall]
+											DEC R1
+											INC R2
+											MOV R3, MAP_LINE_SIZE
+
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z LeftLine_LU
+
+											MOV R1, RIGHT_DOWN
+											MOV M[BallDirection], R1
+											JMP End
+	
+						ContinueLeftUp:	MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										
+										CMP R1, 2d
+										JMP.Z UpLine_LU
+										CMP R2, 1d
+										JMP.Z LeftLine_LU
+
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+
+										SHL R1, 8d
+										OR R1, R2
+										MOV M[CURSOR], R1
+										MOV R1, ' '
+										MOV M[IO_WRITE], R1
+
+										MOV R1, M[yBall]
+										MOV R2, M[xBall]
+										DEC R1
+										DEC R2
+
+										MOV M[yBall], R1
+										MOV M[xBall], R2
+
+										SHL R1, 8d
+										OR R1, R2
+										MOV M[CURSOR], R1
+										MOV R1, 'o'
+										MOV M[IO_WRITE], R1
+										JMP End
+			
+			LeftDown:	MOV R1, M[yBall]
+						MOV R2, M[xBall]
+
+						MOV R3, MAP_LINE_SIZE
+
+						MUL R1, R3
+						ADD R3, R2	
+						MOV R2, Line0Map
+						ADD R3, R2
+						MOV R1, M[ R3 ]
+						MOV R2, '='
+						CMP R1, R2
+						JMP.Z BrickDetected_LD
+						JMP ContinueLeftDown
+
+						BrickDetected_LD:	MOV R2, ' '
+											MOV M[R3], R2
+
+											MOV R1, M[yBall]
+											MOV R2, M[xBall]
 
 											SHL R1, 8d
 											OR R1, R2
 											MOV M[CURSOR], R1
-											MOV R1, 'o'
+											MOV R1, ' '
 											MOV M[IO_WRITE], R1
+
+											MOV R1, M[yBall]
+											MOV R2, M[xBall]
+											DEC R1
+											DEC R2
+											MOV R3, MAP_LINE_SIZE
+
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z DownLine_LD
+
+											MOV R1, M[yBall]
+											MOV R2, M[xBall]
+											INC R1
+											INC R2
+											MOV R3, MAP_LINE_SIZE
+
+											MUL R1, R3
+											ADD R3, R2
+											MOV R2, Line0Map
+											ADD R3, R2
+											MOV R1, M[R3]
+											MOV R2, ' '
+											CMP R1, R2
+											JMP.Z LeftLine_LD
+
+											MOV R1, LEFT_UP
+											MOV M[BallDirection], R1
 											JMP End
+
+						ContinueLeftDown:	MOV R1, M[yBall]
+											MOV R2, M[xBall]
+											MOV R3, M[LeftColumnBar]
+
+											CMP R1, 19d
+											JMP.NZ NoBarCollision_LD
+											CMP R2, R3
+											JMP.NP NoBarCollision_LD
+
+											MOV R4, 29d
+											ADD R3, R4
+											CMP R3, R2
+											JMP.NP NoBarCollision_LD
+
+											JMP DownLine_LD
+
+											NoBarCollision_LD:	CMP R1, 22d
+																CALL.Z LoseLifes
+																CMP R2, 1d
+																JMP.Z LeftLine_LD
+
+																MOV R1, M[yBall]
+																MOV R2, M[xBall]
+
+																SHL R1, 8d
+																OR R1, R2
+																MOV M[CURSOR], R1
+																MOV R1, ' '
+																MOV M[IO_WRITE], R1
+
+																MOV R1, M[yBall]
+																MOV R2, M[xBall]
+																INC R1
+																DEC R2
+
+																MOV M[yBall], R1
+																MOV M[xBall], R2
+
+																SHL R1, 8d
+																OR R1, R2
+																MOV M[CURSOR], R1
+																MOV R1, 'o'
+																MOV M[IO_WRITE], R1
+																JMP End
 
 			UpLine_RU:	MOV R1, RIGHT_DOWN
 						MOV M[BallDirection], R1
@@ -570,22 +813,20 @@ PrintLoad:	PUSH R1
 ; Função SetTimer
 ;------------------------------------------------------------------------------
 SetTimer:	PUSH R1
-			PUSH R2
 
-			MOV R1, 4d
+			MOV R1, 2d
 			MOV M[TIMER_UNITS], R1
 
 			MOV R1, 1d
 			MOV M[ACTIVATE_TIMER], R1
 
-			POP R2
 			POP R1
 			RET
 
 ;------------------------------------------------------------------------------
-; Função LoseLife
+; Função LoseLifes
 ;------------------------------------------------------------------------------
-LoseLife:	PUSH R1
+LoseLifes:	PUSH R1
 			PUSH R2
 
 			MOV R1, M[Lifes]
