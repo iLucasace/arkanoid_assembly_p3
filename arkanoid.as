@@ -31,6 +31,18 @@ TRUE			EQU		1d
 
 MAP_LINE_SIZE	EQU		80d
 
+MAX_SCORE		EQU		300d
+
+COLUMN_UNIT		EQU		12d
+COLUMN_TENTHS	EQU		11d
+COLUMN_HUNDREDS	EQU		10d
+
+BASE_ASCII		EQU		48d
+
+FINAL_COLUMN_UNIT		EQU		44d
+FINAL_COLUMN_TENTHS		EQU		43d
+FINAL_COLUMN_HUNDREDS	EQU		42d
+
 ;-----------------------------------------------------------------------------
 ; ZONA II: definicao de variaveis
 ;          Pseudo-instrucoes : WORD - palavra (16 bits)
@@ -65,7 +77,7 @@ Line22Load  STR '                                                               
 Line23Load  STR '                                                                                ', FIM_TEXTO
 
 
-Line0Map	STR '   Score: 00 | Lifes: S2 S2 S2                                        Arkanoid  '
+Line0Map	STR '   Score: 000 | Lifes: S2 S2 S2                                       Arkanoid  '
 Line1Map	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|'
 Line2Map	STR '|                                                                              |'
 Line3Map	STR '|                                                                              |'
@@ -90,30 +102,8 @@ Line21Map  	STR '|                                                              
 Line22Map  	STR '|                                                                              |'
 Line23Map  	STR '|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|', FIM_TEXTO
 
-Line0Loose	STR '                                                                                '
-Line1Loose	STR '                                                                                '
-Line2Loose	STR '          __     ______  _    _    _      ____   ____   _____ ______ _          '
-Line3Loose	STR '          \ \   / / __ \| |  | |  | |    / __ \ / __ \ / ____|  ____| |         '
-Line4Loose	STR '           \ \_/ / |  | | |  | |  | |   | |  | | |  | | (___ | |__  | |         '
-Line5Loose  STR '            \   /| |  | | |  | |  | |   | |  | | |  | |\___ \|  __| | |         '
-Line6Loose  STR '             | | | |__| | |__| |  | |___| |__| | |__| |____) | |____|_|         '
-Line7Loose  STR '             |_|  \____/ \____/   |______\____/ \____/|_____/|______(_)         '
-Line8Loose  STR '                                                                                '
-Line9Loose  STR '                                                                                '
-Line10Loose STR '                                       :(                                       '
-Line11Loose STR '                                                                                '
-Line12Loose STR '                                                                                '
-Line13Loose STR '                                                                                '
-Line14Loose STR '                                                                                '
-Line15Loose STR '                                                                                '
-Line16Loose STR '                                   Score: 300                                   '
-Line17Loose STR '                                                                                '
-Line18Loose STR '                                                                                '
-Line19Loose STR '                                                                                '
-Line20Loose STR '                                                                                '
-Line21Loose STR '                                                                                '
-Line22Loose STR '                                                                                '
-Line23Loose STR '                                                                                ', FIM_TEXTO
+LineLoose 	STR '|                       ----------> YOU LOSE! <----------                      |', FIM_TEXTO
+LineWin 	STR '|                       ----------> YOU WIN! <----------                       |', FIM_TEXTO
 
 StringToPrint 		WORD 0d  ; Endereco da string que será impressa
 LineNumberToPrint 	WORD 0d  ; Número da linha que será impressa
@@ -128,6 +118,7 @@ xBall               WORD 40d
 yBall               WORD 14d
 
 Lifes				WORD 3d
+Score				WORD 295d
 
 Flag				WORD FALSE
 
@@ -182,6 +173,11 @@ Timer:		PUSH R1
 
 					BrickDetected_RU: 	MOV R2, ' '
 										MOV M[R3], R2
+										
+										CALL UpdateScore
+										MOV R1, M[Flag]
+										CMP R1, FALSE
+										JMP.Z EndGame
 
 										MOV R1, M[yBall]
 										MOV R2, M[xBall]
@@ -275,6 +271,11 @@ Timer:		PUSH R1
 
 						BrickDetected_RD:	MOV R2, ' '
 											MOV M[R3], R2
+											
+											CALL UpdateScore
+											MOV R1, M[Flag]
+											CMP R1, FALSE
+											JMP.Z EndGame
 
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
@@ -338,6 +339,10 @@ Timer:		PUSH R1
 
 											NoBarCollision_RD:	CMP R1, 22d
 																CALL.Z LoseLifes
+																MOV R1, M[Lifes]
+																CMP R1, 0d
+																JMP.Z EndGame
+
 																CMP R2, 78d
 																JMP.Z RightLine_RD
 
@@ -381,6 +386,11 @@ Timer:		PUSH R1
 
 						BrickDetected_LU:	MOV R2, ' '
 											MOV M[R3], R2
+
+											CALL UpdateScore
+											MOV R1, M[Flag]
+											CMP R1, FALSE
+											JMP.Z EndGame
 
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
@@ -475,6 +485,11 @@ Timer:		PUSH R1
 						BrickDetected_LD:	MOV R2, ' '
 											MOV M[R3], R2
 
+											CALL UpdateScore
+											MOV R1, M[Flag]
+											CMP R1, FALSE
+											JMP.Z EndGame
+
 											MOV R1, M[yBall]
 											MOV R2, M[xBall]
 
@@ -536,6 +551,10 @@ Timer:		PUSH R1
 
 											NoBarCollision_LD:	CMP R1, 22d
 																CALL.Z LoseLifes
+																MOV R1, M[Lifes]
+																CMP R1, 0d
+																JMP.Z EndGame
+
 																CMP R2, 1d
 																JMP.Z LeftLine_LD
 
@@ -600,11 +619,19 @@ Timer:		PUSH R1
 					POP R1
 					RTI
 
+			EndGame: 	POP R2
+						POP R1
+						RTI
+
 ;------------------------------------------------------------------------------
 ; Rotina de Interrupção PrintMap
 ;------------------------------------------------------------------------------
 PrintMap:	PUSH R1
 			PUSH R2
+
+			MOV R1, M[Flag]
+			CMP R1, TRUE
+			JMP.Z EndMap
 
 			MOV R1, Line0Map
 			MOV M[StringToPrint], R1
@@ -628,10 +655,11 @@ PrintMap:	PUSH R1
 			MOV M[Lifes], R1
 
 			CALL SetTimer
+			JMP EndMap
 
-			POP R2
-	        POP R1
-			RTI
+			EndMap: POP R2
+	        	 	POP R1
+			     	RTI
 
 ;------------------------------------------------------------------------------
 ; Rotina de Interrupção MoveBarLeft e MoveBarRight
@@ -792,6 +820,28 @@ PrintLines:	PUSH R1
 			POP R1
 			RET
 
+PrintLine:	PUSH R1
+			PUSH R2
+
+			MOV R2, 0d
+
+			while: 	MOV R1, M[LineNumberToPrint]
+					MOV R4, M[StringToPrint]
+					ADD R4, R2
+					MOV R3, M[R4]
+
+					SHL R1, 8d
+					OR R1, R2
+					MOV M[CURSOR], R1
+					MOV M[IO_WRITE], R3
+
+					INC R2
+					CMP R2, 80d
+					JMP.NZ while
+
+			POP R2
+			POP R1
+			RET
 ;------------------------------------------------------------------------------
 ; Funções para imprimir a tela de carregamento
 ;------------------------------------------------------------------------------
@@ -814,7 +864,7 @@ PrintLoad:	PUSH R1
 ;------------------------------------------------------------------------------
 SetTimer:	PUSH R1
 
-			MOV R1, 2d
+			MOV R1, 1d
 			MOV M[TIMER_UNITS], R1
 
 			MOV R1, 1d
@@ -858,7 +908,7 @@ LoseLifes:	PUSH R1
 							MOV M[BallDirection], R1
 
 							MOV R1, 0d
-							MOV R2, 29d
+							MOV R2, 30d
 
 							SHL R1, 8d
 							OR R1, R2
@@ -867,7 +917,7 @@ LoseLifes:	PUSH R1
 							MOV M[IO_WRITE], R2
 
 							MOV R1, 0d
-							MOV R2, 28d
+							MOV R2, 29d
 
 							SHL R1, 8d
 							OR R1, R2
@@ -897,7 +947,7 @@ LoseLifes:	PUSH R1
 							MOV M[BallDirection], R1
 
 							MOV R1, 0d
-							MOV R2, 26d
+							MOV R2, 27d
 
 							SHL R1, 8d
 							OR R1, R2
@@ -906,7 +956,7 @@ LoseLifes:	PUSH R1
 							MOV M[IO_WRITE], R2
 
 							MOV R1, 0d
-							MOV R2, 25d
+							MOV R2, 26d
 
 							SHL R1, 8d
 							OR R1, R2
@@ -928,14 +978,32 @@ LoseLifes:	PUSH R1
 							MOV M[IO_WRITE], R2
 
 							MOV R1, 0d
+							MOV R2, 24d
+
+							SHL R1, 8d
+							OR R1, R2
+							MOV M[CURSOR], R1
+							MOV R2, M[EmptySpace]
+							MOV M[IO_WRITE], R2
+
+							MOV R1, 0d
+							MOV R2, 23d
+
+							SHL R1, 8d
+							OR R1, R2
+							MOV M[CURSOR], R1
+							MOV R2, M[EmptySpace]
+							MOV M[IO_WRITE], R2
+
+							MOV R1, 0d
 							MOV M[ACTIVATE_TIMER], R1
 
-							MOV R1, Line0Loose
+							MOV R1, LineLoose
 							MOV M[StringToPrint], R1
-							MOV R1, 0d
+							MOV R1, 15d
    							MOV M[LineNumberToPrint], R1
 
-							CALL PrintLines
+							CALL PrintLine
 
 							MOV R1, FALSE
 							MOV M[Flag], R1
@@ -944,7 +1012,79 @@ LoseLifes:	PUSH R1
 			End_LF: POP R2
 					POP R1
 					RET
-			
+
+UpdateScore:	PUSH R1
+				PUSH R2
+				PUSH R3
+
+				INC M[Score]
+				MOV R1, M[Score]
+				MOV R2, 100d
+
+				DIV R1, R2
+				ADD R1, BASE_ASCII
+				MOV R3, 0d
+				MOV R4, COLUMN_HUNDREDS
+				SHL R3, 8d
+				OR R3, R4
+				MOV M[CURSOR], R3
+				MOV M[IO_WRITE], R1
+
+				MOV R1, 10d
+				DIV R2, R1
+				
+				ADD R2, BASE_ASCII
+				MOV R3, 0d
+				MOV R4, COLUMN_TENTHS
+				SHL R3, 8d
+				OR R3, R4
+				MOV M[CURSOR], R3
+				MOV M[IO_WRITE], R2
+
+				ADD R1, BASE_ASCII
+				MOV R3, 0d
+				MOV R4, COLUMN_UNIT
+				SHL R3, 8d
+				OR R3, R4
+				MOV M[CURSOR], R3
+				MOV M[IO_WRITE], R1
+
+				MOV R1, M[Score]
+				MOV R2, 100d
+
+				DIV R1, R2
+				CMP R1, 3d
+				JMP.Z WinGame
+
+				JMP EndScore
+
+				WinGame: 	MOV R1, M[yBall]
+							MOV R2, M[xBall]
+
+							SHL R1, 8d
+							OR R1, R2
+							MOV M[CURSOR], R1
+							MOV R2, M[EmptySpace]
+							MOV M[IO_WRITE], R2
+				
+							MOV R1, 0d
+							MOV M[ACTIVATE_TIMER], R1
+
+							MOV R1, LineWin
+							MOV M[StringToPrint], R1
+							MOV R1, 15d
+   							MOV M[LineNumberToPrint], R1
+
+							CALL PrintLine
+
+							MOV R1, FALSE
+							MOV M[Flag], R1
+							JMP EndScore
+
+				EndScore: 	POP R3
+							POP R2
+							POP R1
+							RET
 ;------------------------------------------------------------------------------
 ; Função Main
 ;------------------------------------------------------------------------------
