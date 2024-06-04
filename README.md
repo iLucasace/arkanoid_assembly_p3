@@ -23,7 +23,7 @@ git clone https://github.com/iLucasace/arkanoid_assembly_p3.git
 java -jar p3sim.jar arkanoid.exe
 ```
 
-## Configure Keybinds and Play
+## Configure Keybinds
 
 To configure the keybinds, follow the steps:
 
@@ -35,14 +35,14 @@ To configure the keybinds, follow the steps:
 
 ![IVAD](https://github.com/iLucasace/arkanoid_assembly_p3/assets/108379807/6a3d0da5-1444-47a5-a000-45eaa5398af0)
 
-### Run the emulator:
+## Run the Emulator
 
 Press **CTRL + T** and then **CTRL + R**.
 
 ### Game commands:
 
-**P** - Start.  
-**A** - Left.  
-**D** - Right.
+**P** - Start  
+**A** - Left  
+**D** - Right
 
 
