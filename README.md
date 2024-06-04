@@ -23,6 +23,26 @@ git clone https://github.com/iLucasace/arkanoid_assembly_p3.git
 java -jar p3sim.jar arkanoid.exe
 ```
 
-## Game Commands
+## Configure Keybinds and Play
 
-Soon!
+To configure the keybinds, follow the steps:
+
+### Click on "Definições" and then on "Define IVAD":
+
+![Definições-Define_IVAD](https://github.com/iLucasace/arkanoid_assembly_p3/assets/108379807/abdf3abe-c7b4-4c63-84be-879833bcc848)
+
+### Assign the keys as in the image below and click on "Ok":
+
+![IVAD](https://github.com/iLucasace/arkanoid_assembly_p3/assets/108379807/6a3d0da5-1444-47a5-a000-45eaa5398af0)
+
+### Run the emulator:
+
+Press **CTRL + T** and then **CTRL + R**.
+
+### Game commands:
+
+**P** - Start.  
+**A** - Left.  
+**D** - Right.
+
+
